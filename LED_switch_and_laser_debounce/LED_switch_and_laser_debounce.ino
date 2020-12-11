@@ -7,8 +7,9 @@
     2. With an electrically shorting push button, switch between three different LED modes/channels. 
     Modes are 1) All OFF (when laser is active), 2) Epi-illumination widefield fluorescence, 3) Oblique transillumination mode
   
-  History:
-  Version 1.0: 9 Nov. 2020
+  Version History:
+  1.0: 9 Nov. 2020
+  1.1: 7 Dec. 2020 - Added another pin for SI shutter. Now shutter turns laser ON and frame clock turns laser OFF.
   
  */
 
@@ -18,12 +19,13 @@
 #include "digitalWriteFast.h"
 
 // set up constant parameters
-const int laserDebounceTimeUs = 100; // time in microseconds to wait to debounce frameclock
+const int laserDebounceTimeUs = 20; // time in microseconds to wait to debounce frameclock
 const int switchDebounceTimeMs = 10;  // time in milliseconds for switch button debouncing
 
 // Inputs
 const int switchPin = 0;
 const int frameClkPin = 5;
+const int shutterPin = 10;
 
 // Outputs
 const int epiLEDPin = 2;
@@ -40,6 +42,9 @@ boolean previousSwitch = HIGH;
 boolean currentFrameClk = LOW;
 boolean previousFrameClk = LOW;
 
+boolean currentShutter = LOW;
+boolean previousShutter = LOW;
+
 int currentLEDMode = 0;
 
 
@@ -47,6 +52,7 @@ void setup() {
   // Input signals
   pinModeFast(switchPin, INPUT);
   pinModeFast(frameClkPin, INPUT);
+  pinModeFast(shutterPin, INPUT);
 
   // Output signals
   pinModeFast(blinkPin, OUTPUT);
@@ -57,22 +63,26 @@ void setup() {
 }
 
 void loop() {
-  
-  // Check ScanImage frame clock
-  currentFrameClk = digitalReadFast(frameClkPin);
 
-  if (currentFrameClk == HIGH) {
-    if (previousFrameClk == LOW) {
-      // UP edge received, turn on laser immediately
+  // Check Scanimage Shutter and Frame Clock
+  currentFrameClk = digitalReadFast(frameClkPin);
+  currentShutter = digitalReadFast(shutterPin);
+
+  // Turn ON laser if shutter pin goes high
+  if (currentShutter == HIGH) {
+    if (previousShutter == LOW) {
+      // UP edge received on shutter input, turn laser ON immediately
       digitalWriteFast(laserModPin,HIGH);
-    } // Otherwise, frame clock is HIGH, but also was HIGH last loop cycle
+    } // Otherwise, shutter is HIGH, but also was HIGH last loop cycle, do nothing
   }
-  else {
+  
+  // Turn OFF laser if frame clock goes low and stays low for "laserDebounceTimeUs" microseconds
+  if (currentFrameClk == LOW) {
     // Frame clock is LOW
     if (previousFrameClk == HIGH) {
       // DOWN edge received, wait some time before checking again
       delayMicroseconds(laserDebounceTimeUs);
-
+  
       // If it is still low after the debounce time, then we can be sure the acquisition has ended
       if (digitalReadFast(frameClkPin) == LOW) {
         digitalWriteFast(laserModPin,LOW);
@@ -80,6 +90,8 @@ void loop() {
     }
   }
   
+
+  // Do switch button actions
   
   // Get status of switch button
   currentSwitch = digitalReadFast(switchPin);
@@ -127,6 +139,7 @@ void loop() {
 
   // At the end of loop, update previous state variables
   previousFrameClk = currentFrameClk;
+  previousShutter = currentShutter;
   previousSwitch = currentSwitch;
   
 }
