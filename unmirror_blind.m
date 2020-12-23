@@ -89,17 +89,17 @@ end
 % Also save the up and down stacks
 saveDirAndName = [fileDirAndName(1:(end-4)) '_demir_down.tif'];
 fTIF = Fast_Tiff_Write(saveDirAndName,1,0);
-avgImg1 = squeeze(squeeze(mean(mpStackUpDown(:,:,1,:,2),4)));
-fTIF.WriteIMG(single(avgImg));
+avgDownImg = squeeze(squeeze(mean(mpStackUpDown(:,:,1,:,2),4)));
+fTIF.WriteIMG(single(avgDownImg));
 fTIF.close;
 
 saveDirAndName = [fileDirAndName(1:(end-4)) '_demir_up.tif'];
 fTIF = Fast_Tiff_Write(saveDirAndName,1,0);
-avgImg2 = squeeze(squeeze(mean(mpStackUpDown(:,:,2,:,2),4)));
-fTIF.WriteIMG(single(avgImg));
+avgUpImg = squeeze(squeeze(mean(mpStackUpDown(:,:,2,:,2),4)));
+fTIF.WriteIMG(single(avgUpImg));
 fTIF.close;
 
-imshowpair(avgImg1',avgImg2')
+imshowpair(avgDownImg',avgUpImg')
 
 
 
