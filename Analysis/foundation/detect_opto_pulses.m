@@ -28,7 +28,7 @@ pulseStarts = pulseStarts(corectPulseLocations);
 
 % Compute pulse frame #'s (BTW this could be more precise if we broke it
 % down into line by line timing)
-pulseStartFrameNum = floor(pulseStarts/numYPix);
+pulseStartFrameNum = round(pulseStarts/numYPix);
 
 % Report number of pulses detected
 disp(['Detected ' num2str(numel(pulseStartFrameNum)) ' stimulation pulses.'])

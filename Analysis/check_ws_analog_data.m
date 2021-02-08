@@ -1,4 +1,4 @@
-s = ws.loadDataFile('C:\Users\twebe\Desktop\2020.12.16\cell1_0001-0025.h5');
+s = ws.loadDataFile('U:\eng_research_economo\Imaging\Voltron Confocal\wsdata\2021.02.04\slice1_cell1_0101.h5');
 
 fieldNames = fields(s);
 numSweeps = numel(fieldNames)-1;

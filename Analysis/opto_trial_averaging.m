@@ -4,7 +4,7 @@ addpath foundation/
 
 % Input the filename and its directory
 fileName = 'field2_opto_00001.tif';
-fileDir = 'C:\Users\Tim\Desktop';
+fileDir = 'G:\temp\1.28';
 fullFileNameDir = [fileDir filesep fileName];
 
 % Scanner/experiment parameters
@@ -50,17 +50,16 @@ avgMpStack = single(avgMpStack);
 
 % Make file for each plane
 for planeIdx = 1:size(mpStack,3)
-
-    saveDirAndName = [fullFileNameDir(1:(end-4)) '_opto_avg_plane' num2str(planeIdx) '.tif'];
-    fTIF = Fast_Tiff_Write(saveDirAndName,1,0);
-    for fIdx = 1:size(avgMpStack,4)
-        fTIF.WriteIMG(avgMpStack(:,:,planeIdx,fIdx)');
-    end
-    fTIF.close;
-    
+    saveDirAndName = [fullFileNameDir(1:(end-4)) '_avg_plane' num2str(planeIdx) '.tif'];
+    save_tiff_stack(saveDirAndName,squeeze(avgMpStack(:,:,planeIdx,:)));
 end
 
+%% Also save average response (25-45 frames) minus baseline (first 20 frames)
+avgSubtractMpStack = mean(avgMpStack(:,:,:,25:45),4) - mean(avgMpStack(:,:,:,1:beforePulseFrames),4);
 
-
+for planeIdx = 1:size(mpStack,3)
+    saveDirAndName = [fullFileNameDir(1:(end-4)) '_avg_minusbaseline_plane' num2str(planeIdx) '.tif'];
+    save_tiff_stack(saveDirAndName,squeeze(avgSubtractMpStack(:,:,planeIdx,:)));
+end
 
 
